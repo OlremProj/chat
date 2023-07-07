@@ -4,12 +4,12 @@ USER root
 
 WORKDIR /home/app
 
-COPY ./ ./
+COPY ./ /home/app/
 
-COPY  --chown=node package*.json ./
+COPY  --chown=node package*.json /home/app/
 
 # COPY tsconfig.json file
-COPY  --chown=node tsconfig.json ./
+COPY  --chown=node tsconfig.json /home/app/
 
 RUN npm i
 

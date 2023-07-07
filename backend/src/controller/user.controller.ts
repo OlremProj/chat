@@ -1,16 +1,14 @@
-import { UserService } from "@/services/user.service";
+import { logger } from "../logger/logger";
+import { UserService } from "../services/user.service";
 import { Request, Response } from "express";
 
 export class UserController {
-  private userService: UserService;
-
-  constructor() {
-    this.userService = new UserService();
-  }
+  constructor() {}
 
   public async getUsers(req: Request, res: Response) {
+    const userService = new UserService();
     try {
-      const users = await this.userService.getUsers();
+      const users = await userService.getUsers();
       res.json(users);
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
@@ -18,8 +16,9 @@ export class UserController {
   }
 
   public async getUserById(req: Request, res: Response) {
+    const userService = new UserService();
     try {
-      const user = await this.userService.getUserById(req.params.id);
+      const user = await userService.getUserById(req.params.id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
       } else {
@@ -31,17 +30,20 @@ export class UserController {
   }
 
   public async createUser(req: Request, res: Response) {
+    const userService = new UserService();
     try {
-      const user = await this.userService.createUser(req.body);
+      const user = await userService.createUser(req.body);
       res.status(201).json(user);
     } catch (error) {
+      logger.log("error", error.toString());
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
   public async updateUser(req: Request, res: Response) {
+    const userService = new UserService();
     try {
-      const user = await this.userService.updateUser(req.params.id, req.body);
+      const user = await userService.updateUser(req.params.id, req.body);
       if (!user) {
         res.status(404).json({ error: "User not found" });
       } else {
@@ -53,8 +55,9 @@ export class UserController {
   }
 
   public async deleteUser(req: Request, res: Response) {
+    const userService = new UserService();
     try {
-      const user = await this.userService.deleteUser(req.params.id);
+      const user = await userService.deleteUser(req.params.id);
       if (!user) {
         res.status(404).json({ error: "User not found" });
       } else {

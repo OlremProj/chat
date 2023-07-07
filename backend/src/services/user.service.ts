@@ -1,8 +1,12 @@
-import { IUserData, UserModel } from "@/model/user.model";
+import { IUserData, UserModel } from "../model/user.model";
 
 export class UserService {
   public async getUsers(): Promise<Document[]> {
     return UserModel.find();
+  }
+
+  public async getConnectedUsers(): Promise<Document[]> {
+    return UserModel.find({ isConnected: true });
   }
 
   public async getUserById(id: string): Promise<Document | null> {

@@ -1,4 +1,4 @@
-import { IMessageData, MessageModel } from "@/model/message.model";
+import { IMessageData, MessageModel } from "../model/message.model";
 
 export class MessageService {
   public async getMessages(): Promise<Document[]> {

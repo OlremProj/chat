@@ -10,10 +10,10 @@ services:
 
   backend:
     build:
-      context: ./auth-service
+      context: ./backend
       dockerfile: dev.Dockerfile
     volumes:
-      - "./auth-service:/home/app/"
+      - "./backend:/home/app/"
       - /home/app/node_modules
     ports:
       - "8080:8080"
