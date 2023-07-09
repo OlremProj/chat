@@ -57,7 +57,6 @@ export function messagingSocketSystem(
     });
 
     socket.on("update-message", async (messageData) => {
-      console.log("messageData", messageData);
       try {
         await messageService.updateMessage(messageData);
       } catch (err) {
