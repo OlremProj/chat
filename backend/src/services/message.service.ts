@@ -1,6 +1,7 @@
-import { IUserData, UserModel } from "../model/user.model";
-import { IMessageData, MessageModel } from "../model/message.model";
+import { IUserData } from "../model/user.model";
+import { MessageModel } from "../model/message.model";
 import { Types } from "mongoose";
+import { logger } from "../logger/logger";
 
 export class MessageService {
   public async getMessages(): Promise<any> {
@@ -23,8 +24,20 @@ export class MessageService {
   public async updateMessage(
     id: string,
     data: Record<string, unknown>
-  ): Promise<Document | null> {
-    return MessageModel.findByIdAndUpdate(id, data, { new: true });
+  ): Promise<{
+    text: string;
+    messageId: Types.ObjectId;
+    user: IUserData;
+  } | null> {
+    const updatedMessage = await MessageModel.findOneAndUpdate(
+      { _id: new Types.ObjectId(id) },
+      data,
+      {
+        new: true,
+      }
+    );
+    logger.log("updatedMessage", updatedMessage);
+    return updatedMessage as any;
   }
 
   public async deleteMessage(id: string): Promise<Document | null> {

@@ -1,7 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export interface IMessageStore {
-  messages: { user: { userId: string; username: string }; text: string }[];
+  messages: {
+    user: { _id: string; userId: string; username: string };
+    text: string;
+  }[];
 }
 
 export const messageSlice = createSlice({

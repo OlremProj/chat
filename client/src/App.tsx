@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import { IUserStore } from "./store/userReducer";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,11 +9,19 @@ import {
   setMessages,
   addMessages,
 } from "./store/messageReducer";
+import EditIcon from "./components/icons/EditIcon";
+import axios from "axios";
 
 function App() {
   const bottomEl = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isMessageEdit, setIsMessageEdit] = useState<string | undefined>(
+    undefined
+  );
+  const [updatedMessage, setUpdatedMessage] = useState<string | undefined>(
+    undefined
+  );
   const { username, userId } = useSelector(
     (state: { user: IUserStore }) => state.user
   );
@@ -36,14 +44,15 @@ function App() {
     });
 
     socket.on("history-messages", async (receivedMessages) => {
+      console.log("receivedMessages", receivedMessages);
       dispatch(setMessages(receivedMessages));
     });
 
     return () => {
-      socket.emit("disconnect", userId);
+      socket.emit("custom-disconnect", userId);
       socket.close();
     };
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     socket.on("new-message", async (message) => {
@@ -56,6 +65,32 @@ function App() {
     target: { value: React.SetStateAction<string | undefined> };
   }) => {
     setNewMessage(e.target.value);
+  };
+
+  const handleMessageChange = (e: {
+    target: { value: React.SetStateAction<string | undefined> };
+  }) => {
+    setUpdatedMessage(e.target.value);
+  };
+
+  const submitChange = async (event: any, message: any) => {
+    if (event.keyCode !== 13) return;
+
+    socket.emit("update-message", {
+      _id: message._id,
+      text: updatedMessage,
+    });
+
+    const editedMessages = messages.map((memoryMessage: any) => {
+      if (memoryMessage._id === message._id)
+        return { ...message, text: updatedMessage };
+
+      return memoryMessage;
+    });
+
+    dispatch(setMessages(editedMessages));
+    setUpdatedMessage(undefined);
+    setIsMessageEdit(undefined);
   };
 
   const handleSubmit = async () => {
@@ -73,10 +108,31 @@ function App() {
         </p>
         <div className="flex h-5/6 w-1/3 flex-col items-center justify-end space-y-4 p-8 border-2 border-slate-600 rounded-xl shadow-lg bg-slate-200">
           <div className="flex flex-col items-start space-y-4 overflow-y-auto h-full w-full bg-white rounded-xl">
-            {messages.map((message) => (
-              <div className="bg-blue-200 rounded-2xl flex h-fit w-fit p-2">
-                <p className="font-bold">{message.user.username}:</p>
-                <p className="pl-2">{message.text}</p>
+            {messages.map((message: any, i) => (
+              <div
+                key={message._id}
+                className={`${
+                  i % 2 ? "bg-blue-200" : "bg-slate-300"
+                } rounded-2xl h-fit w-fit p-2`}
+                onClick={() => {
+                  setIsMessageEdit(message._id);
+                  setUpdatedMessage(message.text);
+                }}
+              >
+                {message.user._id === userId && <EditIcon />}
+                <div className="flex">
+                  <p className="font-bold">{message.user.username}:</p>
+                  {isMessageEdit === message._id ? (
+                    <input
+                      className="border-2 rounded-xl border-slate-600 p-2"
+                      value={updatedMessage}
+                      onChange={handleMessageChange}
+                      onKeyDown={(event) => submitChange(event, message)}
+                    />
+                  ) : (
+                    <p className="pl-2">{message.text}</p>
+                  )}
+                </div>
               </div>
             ))}
             <div ref={bottomEl}></div>

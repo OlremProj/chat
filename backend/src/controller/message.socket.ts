@@ -59,7 +59,20 @@ export function messagingSocketSystem(
       }
     });
 
-    socket.on("disconnect", async (userId) => {
+    socket.on("update-message", async (messageData) => {
+      console.log("messageData", messageData);
+      try {
+        const { _id, newMessage: text } = messageData;
+        await messageService.updateMessage(_id, {
+          text,
+        });
+      } catch (err) {
+        logger.error(err);
+        io.sockets.emit("error", err);
+      }
+    });
+
+    socket.on("custom-disconnect", async (userId) => {
       await userService.updateUser(userId, { isConnected: false });
       const connectedUsers = await userService.getConnectedUsers();
 
