@@ -1,5 +1,11 @@
 # chat
+## feature 
 
+- create pseudo
+- messaging feature
+- edit message
+- using redux
+  
 ## Requirements
 
 - Docker
