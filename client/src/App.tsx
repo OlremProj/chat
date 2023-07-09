@@ -38,20 +38,15 @@ function App() {
   }, [navigate, userId]);
 
   useEffect(() => {
+    if (!userId) return;
     socket.emit("user-connect", {
       userId,
       username,
     });
 
     socket.on("history-messages", async (receivedMessages) => {
-      console.log("receivedMessages", receivedMessages);
       dispatch(setMessages(receivedMessages));
     });
-
-    return () => {
-      socket.emit("custom-disconnect", userId);
-      socket.close();
-    };
   }, [userId]);
 
   useEffect(() => {
@@ -77,7 +72,7 @@ function App() {
     if (event.keyCode !== 13) return;
 
     socket.emit("update-message", {
-      _id: message._id,
+      ...message,
       text: updatedMessage,
     });
 

@@ -20,7 +20,6 @@ export function messagingSocketSystem(
   });
   io.on("connection", (socket) => {
     socket.on("user-connect", async (userData) => {
-      console.log("userData", userData);
       await userService.updateUser(userData.userId, { isConnected: true });
       const connectedUsers = await userService.getConnectedUsers();
       io.sockets.emit("users-connected");
@@ -29,7 +28,6 @@ export function messagingSocketSystem(
 
       try {
         const messages = await messageService.getMessages();
-        console.log("messages", messages);
         io.sockets.emit("history-messages", messages);
       } catch (err) {
         io.sockets.emit("error", err);
@@ -37,7 +35,6 @@ export function messagingSocketSystem(
     });
 
     socket.on("send-message", async (messageData) => {
-      console.log("messageData", messageData);
       try {
         const { userId: user, newMessage: text } = messageData;
         const newMessage = await messageService.createMessage({
@@ -62,10 +59,7 @@ export function messagingSocketSystem(
     socket.on("update-message", async (messageData) => {
       console.log("messageData", messageData);
       try {
-        const { _id, newMessage: text } = messageData;
-        await messageService.updateMessage(_id, {
-          text,
-        });
+        await messageService.updateMessage(messageData);
       } catch (err) {
         logger.error(err);
         io.sockets.emit("error", err);

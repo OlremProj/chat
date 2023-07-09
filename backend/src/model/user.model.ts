@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 export interface IUserData {
+  _id?: string;
   username?: string;
   isConnected?: boolean;
 }

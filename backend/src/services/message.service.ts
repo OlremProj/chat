@@ -21,23 +21,15 @@ export class MessageService {
     return (await (await message.save()).populate("user")).toObject();
   }
 
-  public async updateMessage(
-    id: string,
-    data: Record<string, unknown>
-  ): Promise<{
-    text: string;
-    messageId: Types.ObjectId;
-    user: IUserData;
-  } | null> {
-    const updatedMessage = await MessageModel.findOneAndUpdate(
-      { _id: new Types.ObjectId(id) },
-      data,
-      {
-        new: true,
-      }
-    );
-    logger.log("updatedMessage", updatedMessage);
-    return updatedMessage as any;
+  public async updateMessage(data: Record<string, unknown>): Promise<any> {
+    const user = new Types.ObjectId((data.user as any)._id);
+
+    const message = new MessageModel({
+      ...data,
+      user,
+    });
+
+    return await MessageModel.updateOne({ _id: message._id }, message);
   }
 
   public async deleteMessage(id: string): Promise<Document | null> {

@@ -10,16 +10,14 @@ export class UserService {
   }
 
   public async getUserById(id: string): Promise<IUserData | null> {
-    console.log("id", id);
     const user = await UserModel.findById(id);
-    console.log("user", user);
-    return user;
+
+    return user.toObject();
   }
 
   public async createUser(data: Record<string, unknown>): Promise<IUserData> {
-    console.log("createUser", data);
     const user = new UserModel(data);
-    return await user.save();
+    return (await user.save()).toObject();
   }
 
   public async updateUser(
