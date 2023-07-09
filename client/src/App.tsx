@@ -1,17 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { IUserStore } from "./store/userReducer";
 import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
-import { IMessageStore, setMessages } from "./store/messageReducer";
+import {
+  IMessageStore,
+  setMessages,
+  addMessages,
+} from "./store/messageReducer";
 
 function App() {
+  const bottomEl = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const socket = io(
-    process.env.REACT_APP_API_AUTH_BASE_URL || "http://localhost:8080"
-  );
   const { username, userId } = useSelector(
     (state: { user: IUserStore }) => state.user
   );
@@ -19,19 +21,36 @@ function App() {
     (state: { messages: IMessageStore }) => state.messages
   );
   const [newMessage, setNewMessage] = useState<string | undefined>();
+  const socket = io(
+    process.env.REACT_APP_API_AUTH_BASE_URL || "http://localhost:8080"
+  );
 
   useEffect(() => {
     if (!userId) navigate("/login");
   }, [navigate, userId]);
 
-  socket.emit("user-connect", {
-    userId,
-    username,
-  });
+  useEffect(() => {
+    socket.emit("user-connect", {
+      userId,
+      username,
+    });
 
-  socket.on("history-messages", async (receivedMessages) => {
-    dispatch(setMessages(receivedMessages));
-  });
+    socket.on("history-messages", async (receivedMessages) => {
+      dispatch(setMessages(receivedMessages));
+    });
+
+    return () => {
+      socket.emit("disconnect", userId);
+      socket.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    socket.on("new-message", async (message) => {
+      dispatch(addMessages(message));
+      (bottomEl?.current as any)?.scrollIntoView?.({ behavior: "smooth" });
+    });
+  }, [dispatch, messages, socket]);
 
   const handleChange = (e: {
     target: { value: React.SetStateAction<string | undefined> };
@@ -39,7 +58,12 @@ function App() {
     setNewMessage(e.target.value);
   };
 
-  const handleSubmit = async () => {};
+  const handleSubmit = async () => {
+    socket.emit("send-message", {
+      userId,
+      newMessage,
+    });
+  };
 
   return (
     <div className="flex h-screen w-screen">
@@ -48,10 +72,14 @@ function App() {
           Welcome to the chat room <span className="font-bold">{username}</span>
         </p>
         <div className="flex h-5/6 w-1/3 flex-col items-center justify-end space-y-4 p-8 border-2 border-slate-600 rounded-xl shadow-lg bg-slate-200">
-          <div className="flex h-full w-full bg-white rounded-xl">
+          <div className="flex flex-col items-start space-y-4 overflow-y-auto h-full w-full bg-white rounded-xl">
             {messages.map((message) => (
-              <p>{message.toString()}</p>
+              <div className="bg-blue-200 rounded-2xl flex h-fit w-fit p-2">
+                <p className="font-bold">{message.user.username}:</p>
+                <p className="pl-2">{message.text}</p>
+              </div>
             ))}
+            <div ref={bottomEl}></div>
           </div>
           <div className="flex space-x-2">
             <input

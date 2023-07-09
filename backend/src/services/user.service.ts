@@ -9,11 +9,15 @@ export class UserService {
     return UserModel.find({ isConnected: true });
   }
 
-  public async getUserById(id: string): Promise<Document | null> {
-    return UserModel.findById(id);
+  public async getUserById(id: string): Promise<IUserData | null> {
+    console.log("id", id);
+    const user = await UserModel.findById(id);
+    console.log("user", user);
+    return user;
   }
 
   public async createUser(data: Record<string, unknown>): Promise<IUserData> {
+    console.log("createUser", data);
     const user = new UserModel(data);
     return await user.save();
   }

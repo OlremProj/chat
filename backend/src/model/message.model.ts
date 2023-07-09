@@ -1,12 +1,14 @@
 import mongoose, { Types } from "mongoose";
-import { UserModel } from "./user.model";
+import { IUserData } from "./user.model";
 
 export interface IMessageData {
+  user?: Types.ObjectId | IUserData;
   text?: string;
 }
 
 const MessageSchema = new mongoose.Schema({
-  userId: { type: Types.ObjectId, ref: UserModel.name },
+  user: { type: Types.ObjectId, ref: "User" },
   text: String,
 });
+
 export const MessageModel = mongoose.model("Message", MessageSchema);

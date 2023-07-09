@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export interface IMessageStore {
-  messages: { userId: string; username: string; text: string }[];
+  messages: { user: { userId: string; username: string }; text: string }[];
 }
 
 export const messageSlice = createSlice({
@@ -13,9 +13,17 @@ export const messageSlice = createSlice({
     setMessages: (state, action) => {
       state.messages = action.payload;
     },
+    addMessages: (state, action) => {
+      if (
+        !state.messages.some(
+          (message: any) => message._id === action.payload._id
+        )
+      )
+        (state as IMessageStore).messages.push(action.payload);
+    },
   },
 });
 
-export const { setMessages } = messageSlice.actions;
+export const { setMessages, addMessages } = messageSlice.actions;
 
 export default messageSlice.reducer;

@@ -1,20 +1,23 @@
+import { IUserData, UserModel } from "../model/user.model";
 import { IMessageData, MessageModel } from "../model/message.model";
+import { Types } from "mongoose";
 
 export class MessageService {
-  public async getMessages(): Promise<Document[]> {
-    return MessageModel.find();
+  public async getMessages(): Promise<any> {
+    return await MessageModel.find().populate("user");
   }
 
   public async getMessageById(id: string): Promise<Document | null> {
     return MessageModel.findById(id);
   }
 
-  public async createMessage(
-    data: Record<string, unknown>
-  ): Promise<IMessageData> {
+  public async createMessage(data: Record<string, unknown>): Promise<{
+    text: string;
+    messageId: Types.ObjectId;
+    user: IUserData;
+  }> {
     const message = new MessageModel(data);
-    await message.save();
-    return message;
+    return (await (await message.save()).populate("user")).toObject();
   }
 
   public async updateMessage(

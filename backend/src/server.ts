@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import http from "http";
 import router from "./router";
-import { messagingSocketSystem } from "./controller/message.controller";
+import { messagingSocketSystem } from "./controller/message.socket";
 
 dotenv.config();
 

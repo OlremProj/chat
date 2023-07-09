@@ -5,7 +5,9 @@ import { IUserStore, setUsername, setUserId } from "../store/userReducer";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const username = useSelector((state: IUserStore) => state.username);
+  const username = useSelector(
+    (state: { user: IUserStore }) => state.user.username
+  );
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const handleChange = (e: {
