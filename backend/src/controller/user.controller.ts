@@ -31,7 +31,6 @@ export class UserController {
 
   public async createUser(req: Request, res: Response) {
     const userService = new UserService();
-    console.log("req.body", req.body);
     try {
       const user = await userService.createUser(req.body);
       res.status(201).json(user);
